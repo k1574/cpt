@@ -82,6 +82,7 @@ again:
 	/* first */
 	case 'u':
 	case KEY_BEG:
+	case KEY_HOME:
 		i = 0;
 		goto show;
 	/* last */
