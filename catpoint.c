@@ -55,6 +55,10 @@ show:
 again:
 	c = getch();
 	switch (c) {
+	/* powerpoint remote presenter shortcuts */
+	case 27:
+	case KEY_F(5):
+	/* end presentation */
 	case 'q':
 		break;
 	/* next */
@@ -79,6 +83,8 @@ again:
 			goto show;
 		}
 		goto again;
+	/* shortcut from powerpoint. Needed for remote presenters. */
+	case '.':
 	/* first */
 	case 'u':
 	case KEY_BEG:
@@ -91,6 +97,7 @@ again:
 		i = argc - 1;
 		goto show;
 	default:
+		/* printf("key pressed = '%d'\n", c); */
 		goto again;
 	}
 
