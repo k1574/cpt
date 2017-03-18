@@ -31,7 +31,7 @@ clean:
 	@echo cleaning
 	@rm -f catpoint ${OBJ} catpoint-${VERSION}.tar.gz
 
-dicatpoint: clean
+dist: clean
 	@echo creating dist tarball
 	@mkdir -p catpoint-${VERSION}
 	@cp -R LICENSE Makefile README.md config.mk ${SRC} catpoint-${VERSION}
