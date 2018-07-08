@@ -15,7 +15,7 @@
 char **p; /* the slides */
 int n; /* the number of slides */
 
-void 
+void
 cleanup(int s)
 {
 	int i;
@@ -25,7 +25,6 @@ cleanup(int s)
 	endwin(); /* restore terminal */
 	exit(1);
 }
-
 
 void
 setsignal()
@@ -38,7 +37,6 @@ setsignal()
 	signal(SIGKILL, cleanup);
 	signal(SIGTERM, cleanup);
 }
-
 
 int
 main(int argc, char *argv[])
@@ -132,7 +130,7 @@ again:
 	}
 
 	/* unmap mem */
-	cleanup(0);	
+	cleanup(0);
 
 	return (0);
 }
