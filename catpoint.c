@@ -10,21 +10,51 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <locale.h>
+#include <signal.h>
+
+char **p; /* the slides */
+int n; /* the number of slides */
+
+void 
+cleanup(int s)
+{
+	int i;
+	for (i = 0; i<n; i++)
+		munmap(p[i], 0x1000);
+
+	endwin(); /* restore terminal */
+	exit(1);
+}
+
+
+void
+setsignal()
+{
+	signal(SIGHUP, cleanup);
+	signal(SIGINT, cleanup);
+	signal(SIGINT, cleanup);
+	signal(SIGQUIT, cleanup);
+	signal(SIGABRT, cleanup);
+	signal(SIGKILL, cleanup);
+	signal(SIGTERM, cleanup);
+}
+
 
 int
 main(int argc, char *argv[])
 {
 	int c, i, fd;
-	char **p; /* the slides */
 
 	if (argc == 1)
 		errx(1, "usage: %s file ...", argv[0]);
 	argv++;
 	argc--;
 
+	setsignal();
 	setlocale(LC_ALL, "");
 
 	p = calloc(argc, sizeof(char *));
+	n = argc;
 
 	/* map files to mem */
 	for (i = 0; argv[i] != NULL; i++) {
@@ -102,10 +132,7 @@ again:
 	}
 
 	/* unmap mem */
-	for (i = 0; argv[i] != NULL; i++)
-		munmap(p[i], 0x1000);
-
-	endwin(); /* restore terminal */
+	cleanup(0);	
 
 	return (0);
 }
