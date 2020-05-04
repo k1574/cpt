@@ -1,6 +1,7 @@
 /* $Id: catpoint.c,v 1.2 2013/03/28 12:00:48 lostd Exp $ */
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/mman.h>
 
 #include <err.h>
@@ -42,6 +43,7 @@ int
 main(int argc, char *argv[])
 {
 	int c, i, fd;
+	struct stat statbuf;
 
 	if (argc == 1)
 		errx(1, "usage: %s file ...", argv[0]);
@@ -59,7 +61,9 @@ main(int argc, char *argv[])
 		fd = open(argv[i], O_RDONLY, 0);
 		if (fd == -1)
 			err(1, "open: %s", argv[i]);
-		p[i] = mmap(NULL, 0x1000, PROT_READ, MAP_PRIVATE, fd, 0);
+		if (fstat(fd, &statbuf) < 0)
+			err(1, "fstat: %s", argv[i]);
+		p[i] = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 		if (p[i] == MAP_FAILED)
 			err(1, "mmap");
 		close(fd);
