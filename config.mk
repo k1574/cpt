@@ -9,6 +9,8 @@ MANPREFIX = ${PREFIX}/share/man
 
 # libs
 LIBS = -lncursesw
+# Gentoo
+#LIBS = -lncursesw -ltinfow
 
 # flags
 CFLAGS = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os
