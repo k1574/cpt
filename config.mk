@@ -8,7 +8,7 @@ PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
 # libs
-LIBS = -lncursesw
+LIBS = -lncursesw -ltinfow
 
 # flags
 CFLAGS = -std=c99 -pedantic -Wall -Wno-deprecated-declarations -Os
