@@ -4,7 +4,7 @@
 .POSIX:
 
 NAME = catpoint
-VERSION = 1.0
+VERSION = 0.2
 
 # paths
 PREFIX = /usr/local
