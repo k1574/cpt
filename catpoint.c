@@ -17,7 +17,7 @@ char **p; /* the slides */
 int n; /* the number of slides */
 
 void
-cleanup(void)
+cleanup(int sig)
 {
 	int i;
 
@@ -151,7 +151,7 @@ again:
 	}
 
 	/* unmap mem */
-	cleanup();
+	cleanup(0);
 
-	return (0);
+	return 0;
 }
