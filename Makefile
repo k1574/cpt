@@ -1,15 +1,32 @@
 # catpoint - simple presentation software
 # See LICENSE file for copyright and license details.
 
-include config.mk
+.POSIX:
 
-SRC = catpoint.c
+NAME = catpoint
+VERSION = 1.0
+
+# paths
+PREFIX = /usr/local
+MANPREFIX = ${PREFIX}/share/man
+
+# use system flags.
+CATPOINT_CFLAGS = ${CFLAGS}
+CATPOINT_CPPFLAGS = ${CPPFLAGS}
+CATPOINT_LDFLAGS = ${LDFLAGS} -lncursesw
+
+# Gentoo
+#CATPOINT_LDFLAGS = ${LDFLAGS} -lncursesw -ltinfow
+
+SRC = ${NAME}.c
+MAN1 = ${NAME}.1
+BIN = ${NAME}
 OBJ = ${SRC:.c=.o}
 
-all: options catpoint
+all: catpoint
 
 options:
-	@echo catpoint build options:
+	@echo ${NAME} build options:
 	@echo "CFLAGS   = ${CFLAGS}"
 	@echo "LDFLAGS  = ${LDFLAGS}"
 	@echo "CC       = ${CC}"
@@ -18,42 +35,35 @@ config.h:
 	cp config.def.h config.h
 
 .c.o:
-	@echo CC $<
-	@${CC} -c ${CFLAGS} $<
+	${CC} -c ${CATPOINT_CFLAGS} ${CATPOINT_CPPFLAGS} $<
 
-${OBJ}: config.mk
+${OBJ}:
 
 catpoint: ${OBJ}
-	@echo CC -o $@
-	@${CC} -o $@ ${OBJ} ${LDFLAGS}
+	${CC} -o $@ ${OBJ} ${CATPOINT_LDFLAGS}
 
 clean:
-	@echo cleaning
-	@rm -f catpoint ${OBJ} catpoint-${VERSION}.tar.gz
+	rm -f ${BIN} ${OBJ} ${NAME}-${VERSION}.tar.gz
 
-dist: clean
-	@echo creating dist tarball
-	@mkdir -p catpoint-${VERSION}
-	@cp -R LICENSE Makefile README.md config.mk ${SRC} catpoint-${VERSION}
-	@tar -cf catpoint-${VERSION}.tar catpoint-${VERSION}
-	@gzip catpoint-${VERSION}.tar
-	@rm -rf catpoint-${VERSION}
+dist:
+	mkdir -p ${NAME}-${VERSION}
+	cp -R LICENSE Makefile README.md TOOLS ${SRC} \
+		${MAN1} showoff ${NAME}-${VERSION}
+	tar -cf - "${NAME}-${VERSION}" | \
+		gzip -c > ${NAME}-${VERSION}.tar.gz
+	rm -rf ${NAME}-${VERSION}
 
 install: all
-	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
-	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@cp -f catpoint ${DESTDIR}${PREFIX}/bin
-	@chmod 755 ${DESTDIR}${PREFIX}/bin/catpoint
-	@#echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
-	@#mkdir -p ${DESTDIR}${MANPREFIX}/man1
-	@#sed "s/VERSION/${VERSION}/g" < catpoint.1 > ${DESTDIR}${MANPREFIX}/man1/catpoint.1
-	@#chmod 644 ${DESTDIR}${MANPREFIX}/man1/catpoint.1
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	cp -f ${BIN} ${DESTDIR}${PREFIX}/bin
+	chmod 755 ${DESTDIR}${PREFIX}/bin/${BIN}
+	mkdir -p ${DESTDIR}${MANPREFIX}/man1
+	cp -f ${MAN1} ${DESTDIR}${MANPREFIX}/man1/${MAN1}
+	chmod 644 ${DESTDIR}${MANPREFIX}/man1/${MAN1}
 
 uninstall:
-	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
-	@rm -f ${DESTDIR}${PREFIX}/bin/catpoint
-	#@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
-	#@rm -f ${DESTDIR}${MANPREFIX}/man1/catpoint.1
+	rm -f ${DESTDIR}${PREFIX}/bin/${BIN}
+	rm -f ${DESTDIR}${MANPREFIX}/man1/${MAN1}
 
 .PHONY: all options clean dist install uninstall
 
