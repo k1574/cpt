@@ -55,7 +55,6 @@ setsignal()
 {
 	signal(SIGHUP, cleanup);
 	signal(SIGINT, cleanup);
-	signal(SIGINT, cleanup);
 	signal(SIGQUIT, cleanup);
 	signal(SIGABRT, cleanup);
 	signal(SIGKILL, cleanup);
