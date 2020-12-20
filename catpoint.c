@@ -34,8 +34,10 @@ reload(char **argv, int i)
 	struct stat statbuf;
 	int fd;
 
-	if (p[i] != NULL)
-		munmap(p[i], 0x1000);
+	if (p[i] != NULL) {
+		if (munmap(p[i], 0x1000) < 0)
+			err(1, "munmap: %s", argv[i]);
+	}
 
 	fd = open(argv[i], O_RDONLY, 0);
 	if (fd < 0)
