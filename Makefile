@@ -47,7 +47,7 @@ clean:
 
 dist:
 	mkdir -p ${NAME}-${VERSION}
-	cp -R LICENSE Makefile README.md TOOLS ${SRC} \
+	cp -R LICENSE Makefile README.md TOOLS PATH-MAX-LIMIT.md ${SRC} \
 		${MAN1} showoff ${NAME}-${VERSION}
 	tar -cf - "${NAME}-${VERSION}" | \
 		gzip -c > ${NAME}-${VERSION}.tar.gz
