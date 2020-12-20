@@ -115,6 +115,7 @@ again:
 	c = getch();
 	switch (c) {
 	/* powerpoint remote presenter shortcuts */
+	case 4: /* ^D, EOT */
 	case 27:
 	case KEY_F(5):
 	/* end presentation */
@@ -132,6 +133,7 @@ again:
 		}
 		goto again;
 	/* prev */
+	case ' ':
 	case 'h':
 	case 'k':
 	case KEY_LEFT:
@@ -159,6 +161,7 @@ again:
 	case 'r':
 		reloadcurrentslide(0);
 		goto show;
+	case 12: /* ^L, redraw */
 	case KEY_RESIZE: /* resize / SIGWINCH */
 		goto show;
 	default:
