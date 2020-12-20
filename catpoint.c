@@ -59,8 +59,6 @@ loadcurrentslide(char **argv, int slide)
 void
 reloadcurrentslide(int sig)
 {
-	loadcurrentslide(slidefiles, currentslide);
-
 	if (sig == SIGHUP) {
 		/* Make ncurses redisplay slide. */
 		if (raise(SIGWINCH) < 0)
@@ -168,8 +166,6 @@ again:
 		goto show;
 	/* reload */
 	case 'r':
-		reloadcurrentslide(0);
-		goto show;
 	case 12: /* ^L, redraw */
 	case KEY_RESIZE: /* resize / SIGWINCH */
 		goto show;
