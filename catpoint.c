@@ -14,7 +14,7 @@
 #include <locale.h>
 
 char *currentslidep, **slidefiles; /* the slides */
-int nslides, currentslide, currentslidelen;
+int nslides, currentslide, currentslidelen, exitstatus = 1;
 
 void
 unloadcurrentslide(void)
@@ -32,7 +32,7 @@ cleanup(int sig)
 	unloadcurrentslide();
 
 	endwin(); /* restore terminal */
-	exit(1);
+	exit(exitstatus);
 }
 
 void
@@ -167,6 +167,7 @@ again:
 	}
 
 	/* unmap mem */
+	exitstatus = 0;
 	cleanup(0);
 
 	return 0;
