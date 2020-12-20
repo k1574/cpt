@@ -20,11 +20,32 @@ void
 cleanup(int s)
 {
 	int i;
+
 	for (i = 0; i<n; i++)
 		munmap(p[i], 0x1000);
 
 	endwin(); /* restore terminal */
 	exit(1);
+}
+
+void
+reload(char **argv, int i)
+{
+	struct stat statbuf;
+	int fd;
+
+	if (p[i] != NULL)
+		munmap(p[i], 0x1000);
+
+	fd = open(argv[i], O_RDONLY, 0);
+	if (fd < 0)
+		err(1, "open: %s", argv[i]);
+	if (fstat(fd, &statbuf) < 0)
+		err(1, "fstat: %s", argv[i]);
+	p[i] = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (p[i] == MAP_FAILED)
+		err(1, "mmap");
+	close(fd);
 }
 
 void
@@ -42,8 +63,7 @@ setsignal()
 int
 main(int argc, char *argv[])
 {
-	int c, i, fd;
-	struct stat statbuf;
+	int c, i;
 
 	if (argc == 1)
 		errx(1, "usage: %s file ...", argv[0]);
@@ -57,17 +77,8 @@ main(int argc, char *argv[])
 	n = argc;
 
 	/* map files to mem */
-	for (i = 0; argv[i] != NULL; i++) {
-		fd = open(argv[i], O_RDONLY, 0);
-		if (fd == -1)
-			err(1, "open: %s", argv[i]);
-		if (fstat(fd, &statbuf) < 0)
-			err(1, "fstat: %s", argv[i]);
-		p[i] = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-		if (p[i] == MAP_FAILED)
-			err(1, "mmap");
-		close(fd);
-	}
+	for (i = 0; argv[i] != NULL; i++)
+		reload(argv, i);
 
 	/* init curses */
 	initscr();
@@ -83,6 +94,7 @@ main(int argc, char *argv[])
 show:
 	/* display slide */
 	clear();
+	refresh();
 	printw("%s", p[i]);
 again:
 	c = getch();
@@ -127,6 +139,10 @@ again:
 	case 'i':
 	case KEY_END:
 		i = argc - 1;
+		goto show;
+	/* reload */
+	case 'r':
+		reload(argv, i);
 		goto show;
 	default:
 		/* printf("key pressed = '%d'\n", c); */
