@@ -159,6 +159,8 @@ again:
 	case 'r':
 		reloadcurrentslide(0);
 		goto show;
+	case KEY_RESIZE: /* resize / SIGWINCH */
+		goto show;
 	default:
 		/* printf("key pressed = '%d'\n", c); */
 		goto again;
