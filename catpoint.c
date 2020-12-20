@@ -1,17 +1,17 @@
 /* See LICENSE file for license details. */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <err.h>
 #include <curses.h>
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <locale.h>
-#include <signal.h>
 
 char *currentslidep, **slidefiles; /* the slides */
 int nslides, currentslide, currentslidelen;
