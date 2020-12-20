@@ -14,7 +14,6 @@ MANPREFIX = ${PREFIX}/share/man
 CATPOINT_CFLAGS = ${CFLAGS}
 CATPOINT_CPPFLAGS = ${CPPFLAGS}
 CATPOINT_LDFLAGS = ${LDFLAGS} -lncursesw
-
 # Gentoo
 #CATPOINT_LDFLAGS = ${LDFLAGS} -lncursesw -ltinfow
 
