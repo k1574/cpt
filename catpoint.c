@@ -7,11 +7,12 @@
 #include <err.h>
 #include <curses.h>
 #include <fcntl.h>
+#include <locale.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
-#include <locale.h>
 
 char *currentslidep, **slidefiles; /* the slides */
 int nslides, currentslide, currentslidelen, exitstatus = 1;
