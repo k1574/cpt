@@ -61,18 +61,29 @@ reloadcurrentslide(int sig)
 {
 	loadcurrentslide(slidefiles, currentslide);
 
-	if (sig == SIGHUP)
-		raise(SIGWINCH); /* Redisplay slide. */
+	if (sig == SIGHUP) {
+		/* Make ncurses redisplay slide. */
+		if (raise(SIGWINCH) < 0)
+			err(1, "raise");
+	}
 }
 
 void
 setsignal()
 {
-	signal(SIGHUP, reloadcurrentslide);
+	struct sigaction sa;
 
-	signal(SIGINT, cleanup);
-	signal(SIGQUIT, cleanup);
-	signal(SIGTERM, cleanup);
+	memset(&sa, 0, sizeof(sa));
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	sa.sa_handler = cleanup;
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
+
+	sa.sa_handler = reloadcurrentslide;
+	sigaction(SIGHUP, &sa, NULL);
 }
 
 int
