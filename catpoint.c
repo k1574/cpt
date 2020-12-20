@@ -1,4 +1,4 @@
-/* $Id: catpoint.c,v 1.2 2013/03/28 12:00:48 lostd Exp $ */
+/* See LICENSE file for license details. */
 
 #include <sys/types.h>
 #include <sys/stat.h>
