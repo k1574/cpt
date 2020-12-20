@@ -60,11 +60,8 @@ reloadcurrentslide(int sig)
 {
 	loadcurrentslide(slidefiles, currentslide);
 
-	if (sig == SIGHUP) {
-		clear();
-		refresh();
-		printw("%.*s", currentslidelen, currentslidep);
-	}
+	if (sig == SIGHUP)
+		raise(SIGWINCH); /* Redisplay slide. */
 }
 
 void
