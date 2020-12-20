@@ -1,0 +1,38 @@
+.Dd December 20, 2020
+.Dt CATPOINT 1
+.Os
+.Sh NAME
+.Nm catpoint
+.Nd simple viewer of text files
+.Sh SYNOPSIS
+.Nm
+.Op Ar file...
+.Sh DESCRIPTION
+.Nm
+reads text files from the
+.Ar files
+arguments and prints them to the terminal.
+The slides can be navigated with keybinds.
+.Sh KEYBINDS
+.Bl -tag -width Ds
+.It ^D, q, ESCAPE, F5
+Quit
+.It l, j, SPACE, ARROW RIGHT, ARROW DOWN, PAGE DOWN
+Go to next slide.
+.It h, j, ARROW LEFT, ARROW UP, PAGE UP
+Go to previous slide.
+.It ., u, BEGIN KEY, HOME KEY
+Go to the first slide.
+.It i, END KEY
+Go to the last slide.
+.It r
+Reload the current slide from the file.
+.It ^L
+Redraw the current slide contents.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh SEE ALSO
+.Xr cat 1 ,
+.Sh AUTHORS
+.An Christoph Lohmann Aq Mt 20h@r-36.net
