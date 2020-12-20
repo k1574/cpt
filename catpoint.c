@@ -17,11 +17,11 @@ char **p; /* the slides */
 int n; /* the number of slides */
 
 void
-cleanup(int s)
+cleanup(void)
 {
 	int i;
 
-	for (i = 0; i<n; i++)
+	for (i = 0; i < n; i++)
 		munmap(p[i], 0x1000);
 
 	endwin(); /* restore terminal */
@@ -151,7 +151,7 @@ again:
 	}
 
 	/* unmap mem */
-	cleanup(0);
+	cleanup();
 
 	return (0);
 }
