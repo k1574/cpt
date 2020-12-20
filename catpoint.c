@@ -63,7 +63,7 @@ reloadcurrentslide(int sig)
 	if (sig == SIGHUP) {
 		clear();
 		refresh();
-		printw("%s", currentslidep);
+		printw("%.*s", currentslidelen, currentslidep);
 	}
 }
 
@@ -109,7 +109,7 @@ show:
 	loadcurrentslide(slidefiles, currentslide);
 	clear();
 	refresh();
-	printw("%s", currentslidep);
+	printw("%.*s", currentslidelen, currentslidep);
 
 again:
 	c = getch();
