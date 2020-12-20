@@ -13,16 +13,16 @@
 #include <locale.h>
 #include <signal.h>
 
-char **p; /* the slides */
-int n; /* the number of slides */
+char **slides, **slidefiles; /* the slides */
+int nslides, currentslide;
 
 void
 cleanup(int sig)
 {
 	int i;
 
-	for (i = 0; i < n; i++)
-		munmap(p[i], 0x1000);
+	for (i = 0; i < nslides; i++)
+		munmap(slides[i], 0x1000);
 
 	endwin(); /* restore terminal */
 	exit(1);
@@ -34,26 +34,39 @@ reload(char **argv, int i)
 	struct stat statbuf;
 	int fd;
 
-	if (p[i] != NULL) {
-		if (munmap(p[i], 0x1000) < 0)
-			err(1, "munmap: %s", argv[i]);
+	if (slides[i] != NULL) {
+		if (munmap(slides[i], 0x1000) < 0)
+			err(1, "munmap: %s", slidefiles[i]);
 	}
 
-	fd = open(argv[i], O_RDONLY, 0);
+	fd = open(slidefiles[i], O_RDONLY, 0);
 	if (fd < 0)
-		err(1, "open: %s", argv[i]);
+		err(1, "open: %s", slidefiles[i]);
 	if (fstat(fd, &statbuf) < 0)
-		err(1, "fstat: %s", argv[i]);
-	p[i] = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-	if (p[i] == MAP_FAILED)
+		err(1, "fstat: %s", slidefiles[i]);
+	slides[i] = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (slides[i] == MAP_FAILED)
 		err(1, "mmap");
 	close(fd);
 }
 
 void
+reloadcurrentslide(int sig)
+{
+	reload(slidefiles, currentslide);
+
+	if (sig == SIGHUP) {
+		clear();
+		refresh();
+		printw("%s", slides[currentslide]);
+	}
+}
+
+void
 setsignal()
 {
-	signal(SIGHUP, cleanup);
+	signal(SIGHUP, reloadcurrentslide);
+
 	signal(SIGINT, cleanup);
 	signal(SIGQUIT, cleanup);
 	signal(SIGABRT, cleanup);
@@ -64,22 +77,25 @@ setsignal()
 int
 main(int argc, char *argv[])
 {
-	int c, i;
+	int c;
 
 	if (argc == 1)
 		errx(1, "usage: %s file ...", argv[0]);
-	argv++;
-	argc--;
+	slidefiles = ++argv;
+	nslides = --argc;
 
 	setsignal();
 	setlocale(LC_ALL, "");
 
-	p = calloc(argc, sizeof(char *));
-	n = argc;
+	slides = calloc(nslides, sizeof(char *));
 
 	/* map files to mem */
-	for (i = 0; argv[i] != NULL; i++)
-		reload(argv, i);
+	for (currentslide = 0; slidefiles[currentslide] != NULL;
+			currentslide++) {
+		reload(slidefiles, currentslide);
+	}
+	/* start */
+	currentslide = 0;
 
 	/* init curses */
 	initscr();
@@ -90,13 +106,12 @@ main(int argc, char *argv[])
 	keypad(stdscr, TRUE);
 	curs_set(FALSE); /* hide cursor */
 
-	/* start */
-	i = 0;
 show:
 	/* display slide */
 	clear();
 	refresh();
-	printw("%s", p[i]);
+	printw("%s", slides[currentslide]);
+
 again:
 	c = getch();
 	switch (c) {
@@ -112,8 +127,8 @@ again:
 	case KEY_RIGHT:
 	case KEY_DOWN:
 	case KEY_NPAGE:
-		if (i < argc - 1) {
-			i++;
+		if (currentslide < nslides - 1) {
+			currentslide++;
 			goto show;
 		}
 		goto again;
@@ -123,8 +138,8 @@ again:
 	case KEY_LEFT:
 	case KEY_UP:
 	case KEY_PPAGE:
-		if (i > 0) {
-			i--;
+		if (currentslide > 0) {
+			currentslide--;
 			goto show;
 		}
 		goto again;
@@ -134,16 +149,16 @@ again:
 	case 'u':
 	case KEY_BEG:
 	case KEY_HOME:
-		i = 0;
+		currentslide = 0;
 		goto show;
 	/* last */
 	case 'i':
 	case KEY_END:
-		i = argc - 1;
+		currentslide = nslides - 1;
 		goto show;
 	/* reload */
 	case 'r':
-		reload(argv, i);
+		reloadcurrentslide(0);
 		goto show;
 	default:
 		/* printf("key pressed = '%d'\n", c); */
@@ -155,3 +170,4 @@ again:
 
 	return 0;
 }
+
