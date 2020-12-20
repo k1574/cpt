@@ -13,52 +13,57 @@
 #include <locale.h>
 #include <signal.h>
 
-char **slides, **slidefiles; /* the slides */
-int nslides, currentslide;
+char *currentslidep, **slidefiles; /* the slides */
+int nslides, currentslide, currentslidelen;
+
+void
+unloadcurrentslide(void)
+{
+	if (currentslidep == NULL)
+		return;
+
+	if (munmap(currentslidep, currentslidelen) < 0)
+		err(1, "munmap: %s", slidefiles[currentslide]);
+}
 
 void
 cleanup(int sig)
 {
-	int i;
-
-	for (i = 0; i < nslides; i++)
-		munmap(slides[i], 0x1000);
+	unloadcurrentslide();
 
 	endwin(); /* restore terminal */
 	exit(1);
 }
 
 void
-reload(char **argv, int i)
+loadcurrentslide(char **argv, int slide)
 {
 	struct stat statbuf;
 	int fd;
 
-	if (slides[i] != NULL) {
-		if (munmap(slides[i], 0x1000) < 0)
-			err(1, "munmap: %s", slidefiles[i]);
-	}
+	unloadcurrentslide();
 
-	fd = open(slidefiles[i], O_RDONLY, 0);
+	fd = open(slidefiles[slide], O_RDONLY, 0);
 	if (fd < 0)
-		err(1, "open: %s", slidefiles[i]);
+		err(1, "open: %s", slidefiles[slide]);
 	if (fstat(fd, &statbuf) < 0)
-		err(1, "fstat: %s", slidefiles[i]);
-	slides[i] = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-	if (slides[i] == MAP_FAILED)
+		err(1, "fstat: %s", slidefiles[slide]);
+	currentslidep = mmap(NULL, statbuf.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+	if (currentslidep == MAP_FAILED)
 		err(1, "mmap");
+	currentslidelen = statbuf.st_size;
 	close(fd);
 }
 
 void
 reloadcurrentslide(int sig)
 {
-	reload(slidefiles, currentslide);
+	loadcurrentslide(slidefiles, currentslide);
 
 	if (sig == SIGHUP) {
 		clear();
 		refresh();
-		printw("%s", slides[currentslide]);
+		printw("%s", currentslidep);
 	}
 }
 
@@ -69,8 +74,6 @@ setsignal()
 
 	signal(SIGINT, cleanup);
 	signal(SIGQUIT, cleanup);
-	signal(SIGABRT, cleanup);
-	signal(SIGKILL, cleanup);
 	signal(SIGTERM, cleanup);
 }
 
@@ -87,15 +90,10 @@ main(int argc, char *argv[])
 	setsignal();
 	setlocale(LC_ALL, "");
 
-	slides = calloc(nslides, sizeof(char *));
-
-	/* map files to mem */
-	for (currentslide = 0; slidefiles[currentslide] != NULL;
-			currentslide++) {
-		reload(slidefiles, currentslide);
-	}
 	/* start */
 	currentslide = 0;
+	currentslidep = NULL;
+	currentslidelen = 0;
 
 	/* init curses */
 	initscr();
@@ -108,9 +106,10 @@ main(int argc, char *argv[])
 
 show:
 	/* display slide */
+	loadcurrentslide(slidefiles, currentslide);
 	clear();
 	refresh();
-	printw("%s", slides[currentslide]);
+	printw("%s", currentslidep);
 
 again:
 	c = getch();
