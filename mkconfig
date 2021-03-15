@@ -1,0 +1,4 @@
+<$MKINCDIR/config
+PROGNAME = cpt
+LIBS = -lncursesw
+CFILES = main.c
